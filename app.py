@@ -1,8 +1,8 @@
 import streamlit as st
 from db.database import init_db, SessionLocal
-from db.models import Textbook, Content
-from ocr_utils import extract_text_and_images, extract_metadata_from_text
-from parser import parse_markdown_to_content
+from db.models import Textbook, Content, Unit
+from ocr_utils import extract_text, extract_metadata_from_text, extract_relevant_textbook_content
+from parser import parse_markdown_to_units
 import datetime
 
 init_db()
@@ -15,7 +15,6 @@ file = st.file_uploader("Upload a PDF file", type=["pdf"])
 # Initialize session state if not already
 if "ocr_text" not in st.session_state:
     st.session_state.ocr_text = None
-    st.session_state.images = []
     st.session_state.metadata = {
         "title": "",
         "subject": "",
@@ -25,14 +24,20 @@ if "ocr_text" not in st.session_state:
         "year": ""
     }
 
-# Step 1: When file is uploaded, run OCR and metadata
+# Step 1: When file is uploaded, run OCR and metadata 
 if file and st.session_state.ocr_text is None:
     with st.spinner("Running OCR and extracting metadata..."):
-        markdown, images = extract_text_and_images(file)
-        metadata = extract_metadata_from_text(markdown)
+        # Extract raw OCR text from PDF
+        markdown_raw = extract_text(file)
 
-        st.session_state.ocr_text = markdown
-        st.session_state.images = images
+        # Step 1.1: Use full raw OCR to detect metadata
+        metadata = extract_metadata_from_text(markdown_raw)
+
+        # Step 1.2: Use LLM to extract only textbook content (skip preface/index/etc.)
+        filtered_markdown = extract_relevant_textbook_content(markdown_raw)
+
+        # Step 1.3: Store in session for use later
+        st.session_state.ocr_text = filtered_markdown
         st.session_state.metadata = metadata
 
 # Step 2: Show fields (with editable pre-filled values)
@@ -46,8 +51,9 @@ if st.session_state.ocr_text:
 
     if st.button("Extract and Save"):
         with st.spinner("Parsing content and saving to database..."):
-            content_blocks = parse_markdown_to_content(st.session_state.ocr_text)
-
+            units = parse_markdown_to_units(st.session_state.ocr_text)
+            content_blocks = parse_markdown_to_units(st.session_state.ocr_text)
+            
             db = SessionLocal()
             new_book = Textbook(
                 subject=subject,
@@ -63,13 +69,21 @@ if st.session_state.ocr_text:
             db.commit()
             db.refresh(new_book)
 
-            for block in content_blocks:
+            for unit in units:
+                new_unit = Unit(
+                    textbook_id=new_book.textbook_id,
+                    unit_number=int(unit["unit_number"]),
+                    unit_title=unit["unit_title"],
+                    unit_description=None
+                )
+                db.add(new_unit)
+                db.commit()
+                db.refresh(new_unit)
+
                 content = Content(
-                    unit_id=None,
-                    content_type=block["type"],
-                    text_content=block.get("text", ""),
-                    question=block.get("question", ""),
-                    answer=block.get("answer", ""),
+                    unit_id=new_unit.unit_id,
+                    content_type="paragraph",
+                    text_content=unit["content"],
                     is_active=True
                 )
                 db.add(content)
@@ -81,8 +95,3 @@ if st.session_state.ocr_text:
 
             st.markdown("### Extracted Text")
             st.text_area("OCR Text", st.session_state.ocr_text, height=300)
-
-            if st.session_state.images:
-                st.markdown("### Extracted Images")
-                for img in st.session_state.images:
-                    st.image(img)

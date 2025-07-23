@@ -1,14 +1,36 @@
-def parse_markdown_to_content(markdown_text):
-    content_blocks = markdown_text.split("\n\n")
-    parsed = []
+import re
 
-    for block in content_blocks:
-        block = block.strip()
-        if block.startswith("Q:") or "?" in block:
-            question = block
-            answer = ""  # Placeholder
-            parsed.append({"type": "qa", "question": question, "answer": answer})
-        else:
-            parsed.append({"type": "text", "text": block})
+def parse_markdown_to_units(markdown_text):
+    """
+    Splits markdown text into units (chapters/lessons), extracting headers.
+    Returns a list of dicts: {unit_number, unit_title, content}
+    """
+    unit_pattern = re.compile(r"(?:Unit|Lesson|Chapter)\s+(\d+)\s*[:\-\.]?\s*(.*)", re.IGNORECASE)
 
-    return parsed
+    units = []
+    current_unit = None
+    current_content = []
+
+    for line in markdown_text.splitlines():
+        match = unit_pattern.match(line.strip())
+        if match:
+            # Save previous unit
+            if current_unit:
+                current_unit["content"] = "\n".join(current_content).strip()
+                units.append(current_unit)
+
+            # Start new unit
+            unit_number = match.group(1)
+            unit_title = match.group(2).strip()
+            current_unit = {"unit_number": unit_number, "unit_title": unit_title}
+            current_content = []
+
+        elif current_unit:
+            current_content.append(line)
+
+    # Save last unit
+    if current_unit:
+        current_unit["content"] = "\n".join(current_content).strip()
+        units.append(current_unit)
+
+    return units
