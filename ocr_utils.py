@@ -5,6 +5,7 @@ from mistralai import Mistral
 from PIL import Image
 from dotenv import load_dotenv
 import json
+import re
 
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
@@ -47,7 +48,7 @@ def extract_text_and_images(file):
 
 def extract_metadata_from_text(markdown_text):
     api_key = os.getenv("MISTRAL_API_KEY")
-    model = "mistral-medium"  # or "mistral-large-latest" if you have access
+    model = "mistral-medium-2505"  # or "mistral-large-latest" if you have access
 
     client = Mistral(api_key=api_key)
 
@@ -61,7 +62,9 @@ You are an expert at reading school textbooks. Based on the content below, extra
 - publisher
 - year
 
-Strictly respond in JSON format like:
+Respond **only** in this strict JSON format (no explanations):
+
+```json
 {{
   "title": "...",
   "subject": "...",
@@ -87,8 +90,15 @@ Here is the OCR text:
                 }
             ]
         )
-        content = response.choices[0].message.content.strip()
-        return json.loads(content)
+        raw = response.choices[0].message.content.strip()
+        print("🚨 RAW LLM RESPONSE:\n", raw)
+
+        # Remove wrapping triple backticks if present
+        if raw.startswith("```"):
+            raw = re.sub(r"^```(?:json)?\s*", "", raw)  # remove opening ```
+            raw = re.sub(r"\s*```$", "", raw)           # remove closing ```
+
+        return json.loads(raw)
 
     except Exception as e:
         print(f"[Metadata LLM Error] {e}")
