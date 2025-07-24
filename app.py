@@ -1,9 +1,10 @@
 import streamlit as st
 from db.database import init_db, SessionLocal
 from db.models import Textbook, Content, Unit, Chapter
-from ocr_utils import extract_text, extract_metadata_from_text, extract_relevant_textbook_content
+from ocr_utils import extract_text, extract_metadata_from_text, extract_relevant_textbook_content, classify_content_type
 from parser import parse_markdown_to_units
 import datetime
+import re
 
 # Initialize the database
 init_db()
@@ -120,16 +121,30 @@ if st.session_state.ocr_text:
                             if not block:
                                 continue
 
+                            full_content = clean_surrogates(block.get("content", ""))
+                            heading = clean_surrogates(block.get("heading", ""))
+
+                            sub_blocks = re.split(r"(?=\*\*Note|\*\*Activity|\*\*Let’s Do|\*\*Let’s Write|\*\*Exercise|\*\*Poem|\*\*Story)", full_content.strip(), flags=re.IGNORECASE)
+                            for sub_content in sub_blocks:
+                                sub_content = sub_content.strip()
+                                if not sub_content:
+                                    continue
+
+                                content_type = classify_content_type(sub_content)
+
+                            content_text = clean_surrogates(block.get("content", ""))
+                            activity_heading = clean_surrogates(block.get("heading", ""))
+                            content_type = classify_content_type(content_text)
+
                             content = Content(
                                 chapter_id=new_chapter.chapter_id,
-                                content_type="paragraph",
-                                text_content=clean_surrogates(block.get("content", "")),
-                                activity_description=clean_surrogates(block.get("heading", "")),
+                                content_type=content_type,
+                                text_content=content_text,
+                                activity_description=activity_heading,
                                 is_active=True,
                                 created_at=datetime.datetime.now()
                             )
                             db.add(content)
-
                 db.commit()
                 db.close()
 
