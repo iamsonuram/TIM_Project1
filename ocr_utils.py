@@ -7,6 +7,9 @@ from dotenv import load_dotenv
 import json
 import re
 import fitz  # from PyMuPDF
+import logging
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
@@ -15,23 +18,47 @@ VALID_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
 
 def upload_pdf(content, filename):
     client = Mistral(api_key=MISTRAL_API_KEY)
-    uploaded = client.files.upload(file={"file_name": filename, "content": content}, purpose="ocr")
-    signed_url = client.files.get_signed_url(file_id=uploaded.id)
-    return signed_url.url
+    try:
+        uploaded = client.files.upload(file={"file_name": filename, "content": content}, purpose="ocr")
+        signed_url = client.files.get_signed_url(file_id=uploaded.id)
+        return signed_url.url
+    except Exception as e:
+        logger.error(f"Error uploading PDF: {str(e)}")
+        raise
 
 def process_ocr(document_url):
     client = Mistral(api_key=MISTRAL_API_KEY)
-    return client.ocr.process(model="mistral-ocr-2505", document={"type": "document_url", "document_url": document_url}, include_image_base64=True)
+    try:
+        return client.ocr.process(model="mistral-ocr-2505", document={"type": "document_url", "document_url": document_url}, include_image_base64=True)
+    except Exception as e:
+        logger.error(f"Error processing OCR: {str(e)}")
+        raise
 
-# ocr_utils.py
 def extract_text(file) -> str:
-    pdf = fitz.open(stream=file.read(), filetype="pdf")
-    text = "\n".join([page.get_text() for page in pdf])
-    return text
+    try:
+        # Try PyMuPDF first for text-based PDFs
+        pdf = fitz.open(stream=file.read(), filetype="pdf")
+        text = "\n".join([page.get_text() for page in pdf])
+        logger.debug(f"PyMuPDF extracted text length: {len(text)}")
+
+        # If little or no text is extracted, assume image-based PDF and use Mistral OCR
+        if len(text.strip()) < 100:  # Arbitrary threshold
+            logger.info("Minimal text detected, switching to Mistral OCR")
+            file.seek(0)  # Reset file pointer
+            content = file.read()
+            document_url = upload_pdf(content, file.name)
+            ocr_result = process_ocr(document_url)
+            text = ocr_result.text if hasattr(ocr_result, 'text') else ""
+            logger.debug(f"Mistral OCR extracted text length: {len(text)}")
+
+        return text
+    except Exception as e:
+        logger.error(f"Error extracting text: {str(e)}")
+        raise
 
 def extract_metadata_from_text(markdown_text):
     api_key = os.getenv("MISTRAL_API_KEY")
-    model = "mistral-medium-2505"  # or "mistral-large-latest" if you have access
+    model = "mistral-medium-2505"
 
     client = Mistral(api_key=api_key)
 
@@ -56,13 +83,11 @@ Respond **only** in this strict JSON format (no explanations):
   "publisher": "...",
   "year": "..."
 }}
-
 Here is the OCR text:
 \"\"\"
 {markdown_text[:3000]}
 \"\"\"
 """
-
     try:
         response = client.chat.complete(
             model=model,
@@ -78,13 +103,13 @@ Here is the OCR text:
 
         # Remove wrapping triple backticks if present
         if raw.startswith("```"):
-            raw = re.sub(r"^```(?:json)?\s*", "", raw)  # remove opening ```
-            raw = re.sub(r"\s*```$", "", raw)           # remove closing ```
+            raw = re.sub(r"^```(?:json)?\s*", "", raw)
+            raw = re.sub(r"\s*```$", "", raw)
 
         return json.loads(raw)
 
     except Exception as e:
-        print(f"[Metadata LLM Error] {e}")
+        logger.error(f"Metadata LLM Error: {str(e)}")
         return {
             "title": "", "subject": "", "grade": "",
             "language": "", "publisher": "", "year": ""
@@ -105,9 +130,11 @@ Return ONLY the filtered content in clear markdown format (e.g., headers, bullet
             model="mistral-medium",
             messages=[{"role": "user", "content": prompt}]
         )
-        r = response.choices[0].message.content.strip()
-        print("🚨 RAW LLM RESPONSE:\n", r)
-        return response.choices[0].message.content.strip()
+        filtered_text = response.choices[0].message.content.strip()
+        logger.debug(f"Filtered content length: {len(filtered_text)}")
+        return filtered_text
+        
     except Exception as e:
-        print("[LLM Filtering Error]", e)
-        return ocr_text  # fallback: return raw OCR
+        logger.error(f"LLM Filtering Error: {str(e)}")
+        return ocr_text
+        
