@@ -75,71 +75,48 @@ if st.session_state.ocr_text:
                         st.error("Year must be a valid number.")
                         st.stop()
 
-                # Parse units
-                units = parse_markdown_to_units(st.session_state.ocr_text)
-                logger.debug(f"Parsed {len(units)} units: {units}")
+                parsed_units = parse_markdown_to_units(st.session_state.ocr_text)
 
-                if not units:
-                    st.error("No units found in the textbook content. Check the OCR output or unit parsing logic.")
-                    st.stop()
-
-                # Save to database
                 db = SessionLocal()
-                try:
-                    new_book = Textbook(
-                        subject=subject,
-                        grade=grade,
-                        language=language,
-                        title=title,
-                        publisher=publisher,
-                        year=year_int,
-                        source_file=file.name,
-                        created_at=datetime.datetime.now()
+                new_book = Textbook(
+                    subject=subject,
+                    grade=grade,
+                    language=language,
+                    title=title,
+                    publisher=publisher,
+                    year=int(year) if year else None,
+                    source_file=file.name,
+                    created_at=datetime.datetime.now()
+                )
+                db.add(new_book)
+                db.commit()
+                db.refresh(new_book)
+
+                for unit in parsed_units:
+                    new_unit = Unit(
+                        textbook_id=new_book.textbook_id,
+                        unit_number=unit["unit_number"],
+                        unit_title=unit["unit_title"],
+                        unit_description=None
                     )
-                    db.add(new_book)
+                    db.add(new_unit)
                     db.commit()
-                    db.refresh(new_book)
-                    logger.debug(f"Saved textbook: {new_book.textbook_id}")
+                    db.refresh(new_unit)
 
-                    for unit in units:
-                        # Validate unit_number
-                        try:
-                            unit_number = int(unit["unit_number"])
-                        except (ValueError, TypeError):
-                            logger.warning(f"Invalid unit number: {unit['unit_number']}. Skipping unit.")
-                            continue
-
-                        new_unit = Unit(
-                            textbook_id=new_book.textbook_id,
-                            unit_number=unit_number,
-                            unit_title=unit["unit_title"] or "Untitled",
-                            unit_description=None
-                        )
-                        db.add(new_unit)
-                        db.commit()
-                        db.refresh(new_unit)
-                        logger.debug(f"Saved unit: {new_unit.unit_id}")
-
-                        if unit["content"].strip():
+                    for chapter in unit["chapters"]:
+                        for block in chapter["content_blocks"]:
                             content = Content(
                                 unit_id=new_unit.unit_id,
                                 content_type="paragraph",
-                                text_content=unit["content"],
-                                is_active=True
+                                text_content=block["content"],
+                                is_active=True,
+                                created_at=datetime.datetime.now()
                             )
                             db.add(content)
-                            logger.debug(f"Saved content for unit: {new_unit.unit_id}")
-                        else:
-                            logger.warning(f"No content for unit {unit_number}. Skipping content save.")
 
-                    db.commit()
-                    st.success("✅ Textbook content saved to database!")
-                except Exception as e:
-                    db.rollback()
-                    st.error(f"Database error: {str(e)}")
-                    logger.error(f"Database error: {str(e)}")
-                finally:
-                    db.close()
+                db.commit()
+                db.close()
+
 
                 st.markdown("### Extracted Text")
                 st.text_area("OCR Text", st.session_state.ocr_text, height=300)
