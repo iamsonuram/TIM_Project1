@@ -2,7 +2,7 @@ import streamlit as st
 from db.database import init_db, SessionLocal
 from db.models import Textbook, Content, Unit, Chapter
 from ocr_utils import extract_text, extract_metadata_from_text, extract_relevant_textbook_content, classify_content_type
-from parser import parse_markdown_to_units
+from parser import parse_markdown_to_units, split_mixed_block
 import datetime
 import re
 
@@ -124,27 +124,26 @@ if st.session_state.ocr_text:
                             full_content = clean_surrogates(block.get("content", ""))
                             heading = clean_surrogates(block.get("heading", ""))
 
-                            sub_blocks = re.split(r"(?=\*\*Note|\*\*Activity|\*\*Let’s Do|\*\*Let’s Write|\*\*Exercise|\*\*Poem|\*\*Story)", full_content.strip(), flags=re.IGNORECASE)
-                            for sub_content in sub_blocks:
-                                sub_content = sub_content.strip()
-                                if not sub_content:
+                            for block in chapter.get("content_blocks", []):
+                                if not block:
                                     continue
 
-                                content_type = classify_content_type(sub_content)
+                                sub_blocks = split_mixed_block(block.get("content", ""))
+                                if not sub_blocks:
+                                    sub_blocks = [block.get("content", "")]
 
-                            content_text = clean_surrogates(block.get("content", ""))
-                            activity_heading = clean_surrogates(block.get("heading", ""))
-                            content_type = classify_content_type(content_text)
+                                for sub in sub_blocks:
+                                    predicted_type = classify_content_type(sub)
 
-                            content = Content(
-                                chapter_id=new_chapter.chapter_id,
-                                content_type=content_type,
-                                text_content=content_text,
-                                activity_description=activity_heading,
-                                is_active=True,
-                                created_at=datetime.datetime.now()
-                            )
-                            db.add(content)
+                                    content = Content(
+                                        chapter_id=new_chapter.chapter_id,
+                                        content_type=predicted_type,
+                                        text_content=clean_surrogates(sub),
+                                        activity_description=clean_surrogates(block.get("heading", "")),
+                                        is_active=True,
+                                        created_at=datetime.datetime.now()
+                                    )
+                                    db.add(content)
                 db.commit()
                 db.close()
 

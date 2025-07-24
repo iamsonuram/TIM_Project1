@@ -1,7 +1,7 @@
 ```markdown
 # Unit 1: My Family and Me
 
-## Chapter 1: Two Little Hands
+## Chapter 1: Two little hands
 
 ### Let us sing
 
@@ -26,24 +26,25 @@ I have a little body that belongs to me.
 * Now circle ‘One, two, to’ in the song.
 
 **Sight words**
-one | to
+| one | to |
 
 **New words**
 hand | leg | head | eye | ear | nose | mouth
 
-### Note to the teacher
+**Note to the teacher**
 * Use different combinations and variations for the activity.
+* For instance, while reciting the poem, you may say ‘two little hands go...’ and remain silent while continuing to clap.
 * Write sight words and new words on the board.
 
 ### Parts of the Body
 
-**Head, shoulders, knees and toes**
+Head, shoulders, knees and toes
 Head, shoulders, knees and toes
 And eyes and ears
 And mouth and nose
 Head, shoulders, knees and toes
 
-### Note to the teacher
+**Note to the teacher**
 * As children sing, they touch the part of the body referred to.
 * This song may be repeated till the child learns the part of the body.
 * New ways of reciting could be thought of by the teacher.
@@ -83,24 +84,24 @@ Nitin: These are my hands.
 Nitin: What are these?
 Neha: These are my legs.
 
-### Note to the teacher
+**Note to the teacher**
 * Teacher demonstrates the actions and says the sentence, and children repeat after her. Then each child says one sentence in sequence, till every child in the class gets a chance to speak.
 
 ### Match the parts of the body with their pictures.
 
-**Head**
-**Eye**
-**Ear**
-**Nose**
-**Mouth**
-**Tongue**
-**Arm**
-**Hand**
-**Leg**
-**Foot**
-**Cheek**
+Head
+Eye
+Ear
+Nose
+Mouth
+Tongue
+Arm
+Hand
+Leg
+Foot
+Cheek
 
-### Note to the teacher
+**Note to the teacher**
 * Using the picture, say aloud the parts of the body pointing to each one.
 * As children repeat after you, let them also point to the corresponding body part.
 
@@ -109,19 +110,15 @@ Neha: These are my legs.
 Look at the pictures. Read the word, then read the sentence.
 
 I feel with my skin.
-**Skin**
-
+Skin
 I eat with my mouth.
-**Mouth**
-
+Mouth
 I smell with my nose.
-**Nose**
-
+Nose
 I hear with my ears.
-**Ears**
-
+Ears
 I see with my eyes.
-**Eyes**
+Eyes
 
 ### Let us do
 
@@ -133,10 +130,8 @@ Now compare your drawing with your friend’s drawing.
 
 ### Washing hands
 
-### Note to the teacher
+**Note to the teacher**
 * Let the students listen to the instructions one by one and do accordingly.
-
-### Let us do
 
 1. Open the tap or pour water on your hands.
 2. Rub soap on your hands.
@@ -151,13 +146,11 @@ X Y Z, Sugar on bread
 Next day morning, come to me
 We will learn the A B C...
 Happy, happy we shall be
-When we know the A B C...
+When we know the A B C....
 
 **A. Write the letters**
 
-### Let us write
-
-### Let us sing
+**Let us write**
 
 A
 B
@@ -167,7 +160,7 @@ E e
 F
 a
 
-### Let us sing
+**Let us sing**
 
 **A. Sing the alphabet (phonics) song for these letters before you start reading the words.**
 
@@ -181,13 +174,10 @@ f is for fish .... f.... f.... fish
 g is for goat .... g.... g.... goat
 h is for hut .... h.... h.... hut
 i is for ice-cube .... i.... i.... ice-cube
-j is for jug .... j.... j.... jug
+j is for jug .... j.... j... jug
 k is for kite .... k.... k.... kite
 l is for lion .... l.... l.... lion
 m is for mango .... m.... m.... mango
-
-### Note to the teacher
-* Draw attention of the children to the initial sound of each word. Help each child say the word aloud focusing on the initial sound.
 
 n is for nose .... n.... n.... nose
 o is for orange .... o.... o.... orange
@@ -202,6 +192,10 @@ w is for well .... w.... w.... well
 x is for x-ray .... x.... x.... x-ray
 y is for yarn .... y.... y.... yarn
 z is for zebra .... z.... z.... zebra
+
+**Note to the teacher**
+* Draw attention of the children to the initial sound of each word.
+* Help them say the words aloud focusing on the initial sound.
 
 ### Let us speak
 
@@ -232,11 +226,11 @@ den
 door
 dog
 
-### Note to the teacher
+**Note to the teacher**
 * Draw attention of the children to the initial sound of each word given above.
 * Help them say the words aloud focusing on the initial sound.
 
-### Notice the initial sounds of the words in each row. Find the odd one out.
+Notice the initial sounds of the words in each row. Find the odd one out.
 
 1. apple
 clock
@@ -250,364 +244,6 @@ cap
 drum
 dog
 
-### Note to the teacher
+**Note to the teacher**
 * Provide regular and frequent practice of the above exercise.
-
-## Chapter 2: Greetings
-
-### Let us sing
-
-Good morning, good morning
-Good morning to you
-Good morning, good morning
-I am glad to see you.
-
-Good afternoon, good afternoon
-Good afternoon to you
-Good afternoon, good afternoon
-I am glad to see you.
-
-Good evening, good evening
-Good evening to you
-Good evening, good evening
-I am glad to see you.
-
-Good night, good night
-Good night to you
-Good night, good night
-I am glad to see you.
-
-### Note to the teacher
-* Encourage children to greet each other in the morning, afternoon, evening and at night.
-* Let children greet each other in their mother tongue as well.
-
-### Let us speak
-
-**A. Repeat after the teacher**
-
-Teacher: Good morning.
-Children: Good morning.
-
-Teacher: Good afternoon.
-Children: Good afternoon.
-
-Teacher: Good evening.
-Children: Good evening.
-
-Teacher: Good night.
-Children: Good night.
-
-**B. Talk in pairs**
-
-Ask your partner questions such as the ones below.
-
-Nitin: What do you say when you meet someone in the morning?
-Neha: I say, “Good morning.”
-
-Neha: What do you say when you meet someone in the afternoon?
-Nitin: I say, “Good afternoon.”
-
-Nitin: What do you say when you meet someone in the evening?
-Neha: I say, “Good evening.”
-
-Neha: What do you say when you go to bed?
-Nitin: I say, “Good night.”
-
-### Let us read
-
-Look at the pictures. Read the word, then read the sentence.
-
-I say, “Good morning.”
-**Good morning**
-
-I say, “Good afternoon.”
-**Good afternoon**
-
-I say, “Good evening.”
-**Good evening**
-
-I say, “Good night.”
-**Good night**
-
-### Let us do
-
-**Greeting Cards**
-
-Make greeting cards for your friends and family. Write “Good morning,” “Good afternoon,” “Good evening,” or “Good night” on them. Decorate the cards with colours, glitter, or anything else.
-
-### Let us write
-
-**A. Trace the words**
-
-Good morning
-Good afternoon
-Good evening
-Good night
-
-### Note to the teacher
-* Provide extra practice if necessary.
-
-### Let us sing
-
-**The More We Get Together**
-
-The more we get together, together, together
-The more we get together, the happier we’ll be
-For your friends are my friends
-And my friends are your friends
-The more we get together, the happier we’ll be
-
-### Note to the teacher
-* Encourage children to sing along and enjoy the song.
-
-### Let us speak
-
-**A. Repeat after the teacher**
-
-Teacher: I am happy.
-Children: I am happy.
-
-Teacher: You are happy.
-Children: You are happy.
-
-Teacher: We are happy.
-Children: We are happy.
-
-### Let us read
-
-Look at the pictures. Read the word, then read the sentence.
-
-I am happy.
-**Happy**
-
-You are happy.
-**Happy**
-
-We are happy.
-**Happy**
-
-### Let us do
-
-**Happy Faces**
-
-Draw happy faces on a sheet of paper. Colour them and cut them out. Make a collage with your friends’ happy faces.
-
-### Let us write
-
-**A. Trace the words**
-
-Happy
-You
-We
-
-### Note to the teacher
-* Provide extra practice if necessary.
-
-# Unit 2: Life Around Us
-
-## Chapter 1: Picture Time
-
-### Let us sing
-
-**The Wheels on the Bus**
-
-The wheels on the bus go round and round
-Round and round, round and round
-The wheels on the bus go round and round
-All through the town.
-
-The wipers on the bus go swish, swish, swish
-Swish, swish, swish, swish, swish, swish
-The wipers on the bus go swish, swish, swish
-All through the town.
-
-The horn on the bus goes beep, beep, beep
-Beep, beep, beep, beep, beep, beep
-The horn on the bus goes beep, beep, beep
-All through the town.
-
-The people on the bus go up and down
-Up and down, up and down
-The people on the bus go up and down
-All through the town.
-
-### Note to the teacher
-* Encourage children to sing along and enjoy the song.
-* Use actions to make the song more interesting.
-
-### Let us speak
-
-**A. Repeat after the teacher**
-
-Teacher: The wheels on the bus go round and round.
-Children: The wheels on the bus go round and round.
-
-Teacher: The wipers on the bus go swish, swish, swish.
-Children: The wipers on the bus go swish, swish, swish.
-
-Teacher: The horn on the bus goes beep, beep, beep.
-Children: The horn on the bus goes beep, beep, beep.
-
-Teacher: The people on the bus go up and down.
-Children: The people on the bus go up and down.
-
-### Let us read
-
-Look at the pictures. Read the word, then read the sentence.
-
-The wheels on the bus go round and round.
-**Round and round**
-
-The wipers on the bus go swish, swish, swish.
-**Swish, swish, swish**
-
-The horn on the bus goes beep, beep, beep.
-**Beep, beep, beep**
-
-The people on the bus go up and down.
-**Up and down**
-
-### Let us do
-
-**Bus Ride**
-
-Draw a bus on a sheet of paper. Cut out pictures of people and paste them on the bus. Make the bus move by pulling a string attached to it.
-
-### Let us write
-
-**A. Trace the words**
-
-Round
-Swish
-Beep
-Up
-Down
-
-### Note to the teacher
-* Provide extra practice if necessary.
-
-## Chapter 2: The Cap-seller and the Monkeys
-
-### Let us read
-
-**The Cap-seller and the Monkeys**
-
-A cap-seller was passing through a jungle. He was very tired. He sat under a tree and put his basket of caps beside him. Then he lay down and fell asleep.
-
-When he woke up, he saw that all his caps were gone. He looked up and saw some monkeys sitting on the branches of the tree. Each monkey had a cap on its head.
-
-The cap-seller was very angry. He shook his fist at the monkeys and shouted, “Give me back my caps!”
-
-The monkeys only made faces at him. The cap-seller thought for a while. Then he took off his own cap and threw it on the ground.
-
-The monkeys did the same. The cap-seller quickly picked up all the caps and put them back in his basket. Then he went on his way, happy and content.
-
-### Note to the teacher
-* Read the story aloud to the children.
-* Encourage children to enact the story.
-
-### Let us speak
-
-**A. Answer the questions**
-
-1. Where did the cap-seller sit?
-2. What did he see when he woke up?
-3. What did the cap-seller do to get his caps back?
-
-### Let us read
-
-Look at the pictures. Read the word, then read the sentence.
-
-The cap-seller sat under a tree.
-**Tree**
-
-He saw monkeys on the branches.
-**Monkeys**
-
-He threw his cap on the ground.
-**Cap**
-
-The monkeys threw their caps too.
-**Caps**
-
-### Let us do
-
-**Monkey Faces**
-
-Draw monkey faces on a sheet of paper. Colour them and cut them out. Make a collage with your friends’ monkey faces.
-
-### Let us write
-
-**A. Trace the words**
-
-Tree
-Monkeys
-Cap
-Caps
-
-### Note to the teacher
-* Provide extra practice if necessary.
-
-## Chapter 3: Catch Me If You Can
-
-### Let us sing
-
-**Catch Me If You Can**
-
-Catch me if you can,
-I’m the gingerbread man.
-I can run, I can run,
-Catch me if you can.
-
-I ran away from the old man,
-I ran away from the old woman,
-I ran away from the little boy,
-Catch me if you can.
-
-### Note to the teacher
-* Encourage children to sing along and enjoy the song.
-* Use actions to make the song more interesting.
-
-### Let us speak
-
-**A. Repeat after the teacher**
-
-Teacher: Catch me if you can.
-Children: Catch me if you can.
-
-Teacher: I’m the gingerbread man.
-Children: I’m the gingerbread man.
-
-Teacher: I can run, I can run.
-Children: I can run, I can run.
-
-### Let us read
-
-Look at the pictures. Read the word, then read the sentence.
-
-Catch me if you can.
-**Catch me**
-
-I’m the gingerbread man.
-**Gingerbread man**
-
-I can run, I can run.
-**Run**
-
-### Let us do
-
-**Gingerbread Man**
-
-Draw a gingerbread man on a sheet of paper. Colour it and cut it out. Make the gingerbread man run by pulling a string attached to it.
-
-### Let us write
-
-**A. Trace the words**
-
-Catch
-Gingerbread
-Run
-
-### Note to the teacher
-* Provide extra practice if necessary.
 ```

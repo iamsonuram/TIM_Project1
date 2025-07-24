@@ -2,6 +2,8 @@ import os
 import fitz
 from mistralai import Mistral
 import re, json
+import time
+import requests
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -109,30 +111,49 @@ def classify_content_type(text_block: str) -> str:
     """
     Uses Mistral LLM to classify the content type from a block of textbook content.
     """
-
-    client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+    client = Mistral(api_key=MISTRAL_API_KEY)
 
     prompt = f"""
-You are an assistant that classifies content blocks from school textbooks (Grades 1 to 5).
-Based on the content, return one of these content types:
+You are an expert classifier of content blocks from Indian school textbooks (Grades 1–5).
+Your task is to assign a single most appropriate content type label from the list below to a given block of text.
 
-["poem", "story", "activity", "question", "note", "dialogue", "exercise", 
- "example", "reading_passage", "song", "conversation", "picture_description", 
- "fill_in_the_blanks", "short_answer_question", "multiple_choice_question", 
+Allowed content types (respond with **only one**):
+["poem", "story", "activity", "question", "note", "dialogue", "exercise",
+ "example", "reading_passage", "song", "conversation", "picture_description",
+ "fill_in_the_blanks", "short_answer_question", "multiple_choice_question",
  "matching", "rhyme"]
+
+Rules:
+- Return only the label — no explanation, no punctuation.
+- If the block contains multiple types, return only the **most dominant** or educationally intended type.
+- Do not return a list. Do not return explanations.
+- Your response should be only the lowercase label like: poem
 
 Here is the content block:
 {text_block}
+Now classify it and return the label.
+"""
 
-Return ONLY the content type.
-    """
+    retries = 3
+    delay = 10
 
-    try:
-        response = client.chat.complete(
-            model="mistral-medium",
-            messages=[{"role": "user", "content": prompt}]
-        )
-        return response.choices[0].message.content.strip().lower()
-    except Exception as e:
-        print("Content type classification error:", e)
-        return "unknown"
+    for attempt in range(retries):
+        try:
+            response = client.chat.complete(
+                model="mistral-small",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            if response.choices and response.choices[0].message:
+                return response.choices[0].message.content.strip().lower()
+
+        except Exception as e:
+            if "429" in str(e):
+                print("Rate limit hit. Retrying...")
+                time.sleep(delay)
+                delay *= 2  # exponential backoff
+            else:
+                print(f"Content type classification error: {str(e)}")
+                break
+
+    return "unknown"

@@ -95,3 +95,23 @@ def parse_markdown_to_units(markdown_text):
         units.append(current_unit)
 
     return units
+
+def split_mixed_block(content: str) -> list:
+    """
+    Splits a content block into sub-blocks based on recognizable patterns.
+    - **Heading**
+    - A. / B. / C. style exercises
+    - Poem titles or strong lines in all caps
+    """
+    if not content or not isinstance(content, str):
+        return []
+
+    # Normalize stars (** -> ##) for safe regex splitting
+    content = content.replace("**", "##")
+
+    # Split at headings, section labels (like ##A.), or note blocks
+    split_pattern = r'(?=^##|\n##|\n\s*[A-Z]\.|\n\s*Note to the teacher|\n\s*New words|\n\s*Sight words|\n\s*Letter sounds|\n\s*Washing hands|\n\s*My hand|\n\s*Now compare|\n\s*Draw attention|\n\s*Let the students|\n\s*Provide regular|\n\s*Teacher:)'
+
+    blocks = re.split(split_pattern, content)
+    return [b.strip().replace("##", "**") for b in blocks if b.strip()]
+
