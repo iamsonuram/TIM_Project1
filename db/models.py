@@ -28,7 +28,7 @@ class Unit(Base):
 class Content(Base):
     __tablename__ = "content"
     content_id = Column(Integer, primary_key=True)
-    unit_id = Column(Integer, ForeignKey("units.unit_id"))
+    chapter_id = Column(Integer, ForeignKey("chapters.chapter_id"))
     content_type = Column(String)
     text_content = Column(Text)
     question = Column(Text)
@@ -60,8 +60,13 @@ class Media(Base):
     media_description = Column(Text)
     duration = Column(String)
 
-class Tag(Base):
-    __tablename__ = "tags"
-    tag_id = Column(Integer, primary_key=True)
-    content_id = Column(Integer, ForeignKey("content.content_id"))
-    tag = Column(String)
+class Chapter(Base):
+    __tablename__ = "chapters"
+    chapter_id = Column(Integer, primary_key=True)
+    unit_id = Column(Integer, ForeignKey("units.unit_id"))
+    chapter_number = Column(Integer)
+    chapter_title = Column(String)
+    chapter_description = Column(Text)
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime, default=func.now(), onupdate=func.now())
+

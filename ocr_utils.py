@@ -1,67 +1,30 @@
 import os
-import base64
-from io import BytesIO
+import fitz
 from mistralai import Mistral
-from PIL import Image
+import re, json
+
 from dotenv import load_dotenv
-import json
-import re
-import fitz  # from PyMuPDF
-import logging
-
-logger = logging.getLogger(__name__)
-
 load_dotenv()
+
 MISTRAL_API_KEY = os.getenv("MISTRAL_API_KEY")
 
-VALID_EXTENSIONS = {".pdf", ".jpg", ".jpeg", ".png"}
-
-def upload_pdf(content, filename):
-    client = Mistral(api_key=MISTRAL_API_KEY)
-    try:
-        uploaded = client.files.upload(file={"file_name": filename, "content": content}, purpose="ocr")
-        signed_url = client.files.get_signed_url(file_id=uploaded.id)
-        return signed_url.url
-    except Exception as e:
-        logger.error(f"Error uploading PDF: {str(e)}")
-        raise
-
-def process_ocr(document_url):
-    client = Mistral(api_key=MISTRAL_API_KEY)
-    try:
-        return client.ocr.process(model="mistral-ocr-2505", document={"type": "document_url", "document_url": document_url}, include_image_base64=True)
-    except Exception as e:
-        logger.error(f"Error processing OCR: {str(e)}")
-        raise
-
 def extract_text(file) -> str:
+    """
+    Extracts raw text from PDF using PyMuPDF.
+    """
     try:
-        # Try PyMuPDF first for text-based PDFs
         pdf = fitz.open(stream=file.read(), filetype="pdf")
         text = "\n".join([page.get_text() for page in pdf])
-        logger.debug(f"PyMuPDF extracted text length: {len(text)}")
-
-        # If little or no text is extracted, assume image-based PDF and use Mistral OCR
-        if len(text.strip()) < 100:  # Arbitrary threshold
-            logger.info("Minimal text detected, switching to Mistral OCR")
-            file.seek(0)  # Reset file pointer
-            content = file.read()
-            document_url = upload_pdf(content, file.name)
-            ocr_result = process_ocr(document_url)
-            text = ocr_result.text if hasattr(ocr_result, 'text') else ""
-            logger.debug(f"Mistral OCR extracted text length: {len(text)}")
-
-        return text
+        return text.strip()
     except Exception as e:
-        logger.error(f"Error extracting text: {str(e)}")
-        raise
+        print(f"PDF Extraction Error: {str(e)}")
+        return ""
 
-def extract_metadata_from_text(markdown_text):
-    api_key = os.getenv("MISTRAL_API_KEY")
-    model = "mistral-medium-2505"
-
-    client = Mistral(api_key=api_key)
-
+def extract_metadata_from_text(markdown_text: str) -> dict:
+    """
+    Uses Mistral LLM to extract textbook metadata from OCR text.
+    """
+    client = Mistral(api_key=MISTRAL_API_KEY)
     prompt = f"""
 You are an expert at reading school textbooks. Based on the content below, extract the following metadata:
 
@@ -72,9 +35,8 @@ You are an expert at reading school textbooks. Based on the content below, extra
 - publisher
 - year
 
-Respond **only** in this strict JSON format (no explanations):
+Respond ONLY in strict JSON format. Do NOT wrap it in triple backticks or code block.
 
-```json
 {{
   "title": "...",
   "subject": "...",
@@ -83,58 +45,61 @@ Respond **only** in this strict JSON format (no explanations):
   "publisher": "...",
   "year": "..."
 }}
-Here is the OCR text:
+
+OCR Text:
 \"\"\"
-{markdown_text[:3000]}
+{markdown_text[:10000]}
 \"\"\"
-"""
+    """
+
     try:
         response = client.chat.complete(
-            model=model,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
+            model="mistral-small",
+            messages=[{"role": "user", "content": prompt}]
         )
         raw = response.choices[0].message.content.strip()
-        print("🚨 RAW LLM RESPONSE:\n", raw)
+        print("\n\n🔵 Mistral Metadata Response:\n", raw)
 
-        # Remove wrapping triple backticks if present
-        if raw.startswith("```"):
-            raw = re.sub(r"^```(?:json)?\s*", "", raw)
-            raw = re.sub(r"\s*```$", "", raw)
+        # Robust cleanup of triple backticks and `json`
+        cleaned = re.sub(r"^```(?:json)?", "", raw, flags=re.IGNORECASE).strip()
+        cleaned = re.sub(r"```$", "", cleaned).strip()
+        print("\n🧼 Cleaned JSON:\n", cleaned)
 
-        return json.loads(raw)
+        return json.loads(cleaned)
 
     except Exception as e:
-        logger.error(f"Metadata LLM Error: {str(e)}")
+        print(f"Metadata extraction failed: {str(e)}")
         return {
             "title": "", "subject": "", "grade": "",
             "language": "", "publisher": "", "year": ""
         }
 
 def extract_relevant_textbook_content(ocr_text: str) -> str:
-    client = Mistral(api_key=os.getenv("MISTRAL_API_KEY"))
+    """
+    Filters OCR text using Mistral LLM to retain relevant textbook content in markdown format.
+    """
+    client = Mistral(api_key=MISTRAL_API_KEY)
     prompt = f"""
 You are a helpful assistant extracting educational content from an OCR dump of a textbook.
 Here is the raw OCR text:
 {ocr_text}
-Your job is to remove all irrelevant front-matter like publication info, forewords, acknowledgements, contributor lists, copyright, etc.
-Retain only **useful learning content** starting from first Unit/Chapter onward — including poems, activities, teacher notes, instructions, stories.
-Return ONLY the filtered content in clear markdown format (e.g., headers, bullet points, etc). No extra explanations.
-    """
+
+Your job is to remove irrelevant front-matter like publication info, forewords, acknowledgements, contributor lists, copyright, etc.
+Retain all **useful learning content** starting from the first Unit, Chapter, Lesson, or Section header (e.g., "Unit 1: Title", "Chapter 1: Title") onward — including poems, activities, teacher notes, instructions, stories, and their headers.
+Return the filtered content in markdown format, wrapped in ```markdown and ``` delimiters.
+Use # for unit headers (e.g., # Unit 1: Title), ## for chapter headers (e.g., ## Chapter 1: Title), ### for subheadings, and #### for sub-subheadings.
+Preserve all unit and chapter headers exactly as they appear. Include all content under these headers, including poems, lists, and notes.
+No extra explanations.
+"""
+
     try:
         response = client.chat.complete(
             model="mistral-medium",
             messages=[{"role": "user", "content": prompt}]
         )
         filtered_text = response.choices[0].message.content.strip()
-        logger.debug(f"Filtered content length: {len(filtered_text)}")
+        print("\n\n🟢 Mistral Filtered Markdown Response:\n", filtered_text[:1000], "...\n[truncated]")
         return filtered_text
-        
     except Exception as e:
-        logger.error(f"LLM Filtering Error: {str(e)}")
+        print(f"LLM Filtering Error: {str(e)}")
         return ocr_text
-        

@@ -1,15 +1,11 @@
 import streamlit as st
 from db.database import init_db, SessionLocal
-from db.models import Textbook, Content, Unit
+from db.models import Textbook, Content, Unit, Chapter
 from ocr_utils import extract_text, extract_metadata_from_text, extract_relevant_textbook_content
 from parser import parse_markdown_to_units
 import datetime
-import logging
 
-# Set up logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
+# Initialize the database
 init_db()
 
 st.title("📘 PDF Textbook OCR App")
@@ -17,7 +13,6 @@ st.markdown("Upload a textbook PDF, extract content using Mistral OCR, and store
 
 file = st.file_uploader("Upload a PDF file", type=["pdf"])
 
-# Initialize session state if not already
 if "ocr_text" not in st.session_state:
     st.session_state.ocr_text = None
     st.session_state.metadata = {
@@ -29,32 +24,31 @@ if "ocr_text" not in st.session_state:
         "year": ""
     }
 
-# Step 1: When file is uploaded, run OCR and metadata 
+def clean_surrogates(text) -> str:
+    if not isinstance(text, str):
+        return str(text)
+    return text.encode('utf-16', 'surrogatepass').decode('utf-16', 'ignore')
+
 if file and st.session_state.ocr_text is None:
     with st.spinner("Running OCR and extracting metadata..."):
         try:
-            # Extract raw OCR text from PDF
             markdown_raw = extract_text(file)
-            logger.debug(f"Raw OCR text length: {len(markdown_raw)}")
+            print("\n🟡 Raw OCR text extracted.")
 
-            # Step 1.1: Use full raw OCR to detect metadata
             metadata = extract_metadata_from_text(markdown_raw)
-            logger.debug(f"Extracted metadata: {metadata}")
+            print("\n🟡 Metadata extracted:", metadata)
 
-            # Step 1.2: Use LLM to extract only textbook content
             filtered_markdown = extract_relevant_textbook_content(markdown_raw)
-            logger.debug(f"Filtered markdown length: {len(filtered_markdown)}")
+            print("\n🟡 Filtered markdown extracted.")
 
-            # Step 1.3: Store in session for use later
             st.session_state.ocr_text = filtered_markdown
             st.session_state.metadata = metadata
+
         except Exception as e:
             st.error(f"Error during OCR or metadata extraction: {str(e)}")
-            logger.error(f"OCR/Metadata error: {str(e)}")
-            st.session_state.ocr_text = None  # Reset to allow retry
+            st.session_state.ocr_text = None
             st.stop()
 
-# Step 2: Show fields (with editable pre-filled values)
 if st.session_state.ocr_text:
     title = st.text_input("Title", value=st.session_state.metadata.get("title", ""))
     subject = st.text_input("Subject", value=st.session_state.metadata.get("subject", ""))
@@ -66,7 +60,6 @@ if st.session_state.ocr_text:
     if st.button("Extract and Save"):
         with st.spinner("Parsing content and saving to database..."):
             try:
-                # Validate year
                 year_int = None
                 if year.strip():
                     try:
@@ -76,16 +69,19 @@ if st.session_state.ocr_text:
                         st.stop()
 
                 parsed_units = parse_markdown_to_units(st.session_state.ocr_text)
+                if not parsed_units or not isinstance(parsed_units, list):
+                    st.error("Parsed content is empty or malformed. Please check your OCR input.")
+                    st.stop()
 
                 db = SessionLocal()
                 new_book = Textbook(
-                    subject=subject,
-                    grade=grade,
-                    language=language,
-                    title=title,
-                    publisher=publisher,
-                    year=int(year) if year else None,
-                    source_file=file.name,
+                    subject=clean_surrogates(subject),
+                    grade=clean_surrogates(grade),
+                    language=clean_surrogates(language),
+                    title=clean_surrogates(title),
+                    publisher=clean_surrogates(publisher),
+                    year=year_int,
+                    source_file=clean_surrogates(file.name),
                     created_at=datetime.datetime.now()
                 )
                 db.add(new_book)
@@ -93,22 +89,42 @@ if st.session_state.ocr_text:
                 db.refresh(new_book)
 
                 for unit in parsed_units:
+                    if not unit:
+                        continue
+
                     new_unit = Unit(
                         textbook_id=new_book.textbook_id,
-                        unit_number=unit["unit_number"],
-                        unit_title=unit["unit_title"],
+                        unit_number=clean_surrogates(unit.get("unit_number", "")),
+                        unit_title=clean_surrogates(unit.get("unit_title", "")), 
                         unit_description=None
                     )
                     db.add(new_unit)
                     db.commit()
                     db.refresh(new_unit)
 
-                    for chapter in unit["chapters"]:
-                        for block in chapter["content_blocks"]:
+                    for chapter in unit.get("chapters", []):
+                        if not chapter:
+                            continue
+
+                        new_chapter = Chapter(
+                            unit_id=new_unit.unit_id,
+                            chapter_number=clean_surrogates(chapter.get("chapter_number", "1")),
+                            chapter_title=clean_surrogates(chapter.get("chapter_title", "Untitled")),
+                            chapter_description=None
+                        )
+                        db.add(new_chapter)
+                        db.commit()
+                        db.refresh(new_chapter)
+
+                        for block in chapter.get("content_blocks", []):
+                            if not block:
+                                continue
+
                             content = Content(
-                                unit_id=new_unit.unit_id,
+                                chapter_id=new_chapter.chapter_id,
                                 content_type="paragraph",
-                                text_content=block["content"],
+                                text_content=clean_surrogates(block.get("content", "")),
+                                activity_description=clean_surrogates(block.get("heading", "")),
                                 is_active=True,
                                 created_at=datetime.datetime.now()
                             )
@@ -117,9 +133,8 @@ if st.session_state.ocr_text:
                 db.commit()
                 db.close()
 
-
                 st.markdown("### Extracted Text")
                 st.text_area("OCR Text", st.session_state.ocr_text, height=300)
+
             except Exception as e:
                 st.error(f"Error during parsing or saving: {str(e)}")
-                logger.error(f"Parsing/Saving error: {str(e)}")
